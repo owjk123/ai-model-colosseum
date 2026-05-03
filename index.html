@@ -2,131 +2,81 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI模型三国杀 - 群雄逐鹿 | 大模型卡牌对战游戏</title>
-  <meta name="description" content="融合三国杀机制与肉鸽元素的大模型卡牌对战游戏。8个AI模型同场竞技，暗藏身份，合纵连横，最终只有一方胜出！">
-  <meta name="keywords" content="AI模型, 三国杀, 卡牌游戏, 肉鸽, 大模型对战, Roguelike, 桌游">
-  <meta name="author" content="APIYI">
-  <meta name="robots" content="index, follow">
-  
-  <!-- Open Graph -->
-  <meta property="og:title" content="AI模型三国杀 - 群雄逐鹿">
-  <meta property="og:description" content="8个AI模型同场竞技，暗藏身份，合纵连横，最终只有一方胜出！">
-  <meta property="og:type" content="game">
-  
-  <!-- Fonts -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AI Model Colosseum - AI模型三国杀</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-  
-  <!-- Favicon -->
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚔️</text></svg>">
-  
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- Start Screen -->
-  <div id="start-screen" class="screen active">
+  <!-- Start Screen Overlay -->
+  <div id="start-screen" class="overlay">
     <div class="start-container">
-      <div class="title-section">
-        <h1 class="game-title">AI模型三国杀</h1>
-        <p class="game-subtitle">群 雄 逐 鹿</p>
-        <div class="game-tagline">大模型卡牌对战 · 身份暗战 · 策略博弈</div>
+      <canvas id="logo-canvas" width="400" height="120"></canvas>
+      <h1 class="game-title">AI MODEL COLOSSEUM</h1>
+      <p class="game-subtitle">AI模型三国杀</p>
+      
+      <div class="setup-section">
+        <h3>🎮 选择游戏人数</h3>
+        <div class="player-count-btns">
+          <button class="count-btn" data-count="4">4人局</button>
+          <button class="count-btn active" data-count="6">6人局</button>
+          <button class="count-btn" data-count="8">8人局</button>
+        </div>
       </div>
       
       <div class="setup-section">
-        <div class="setup-group">
-          <label class="setup-label">选择参与人数</label>
-          <div class="player-count-selector">
-            <button class="count-btn" data-count="4">4人局</button>
-            <button class="count-btn active" data-count="6">6人局</button>
-            <button class="count-btn" data-count="8">8人局</button>
-          </div>
-        </div>
-        
-        <div class="setup-group">
-          <label class="setup-label">选择你的英雄</label>
-          <div class="hero-selector" id="hero-selector"></div>
-        </div>
-        
-        <button id="start-game-btn" class="start-btn">
-          <span class="btn-text">开始游戏</span>
-          <span class="btn-icon">⚔️</span>
-        </button>
+        <h3>⚔️ 选择你的英雄</h3>
+        <div id="hero-grid" class="hero-grid"></div>
       </div>
       
-      <div class="rules-hint">
-        <p>🎯 目标：作为不同身份，通过出牌、技能、联盟达成胜利条件</p>
-        <p>🔮 身份暗置：除主公外，其他身份未知，需通过行为判断</p>
+      <button id="start-btn" class="neon-button" disabled>
+        <span class="btn-text">开始游戏</span>
+        <span class="btn-glow"></span>
+      </button>
+      
+      <div class="global-modifier-hint">
+        <span id="modifier-display">每局随机全局修饰词将影响游戏</span>
       </div>
     </div>
   </div>
   
-  <!-- Game Screen -->
-  <div id="game-screen" class="screen">
-    <!-- Top Bar -->
-    <div class="top-bar">
-      <div class="deck-info">
-        <span class="deck-icon">🀄</span>
-        <span class="deck-count" id="deck-count">0</span>
-        <span class="discard-icon">📤</span>
-        <span class="discard-count" id="discard-count">0</span>
-      </div>
-      <div class="turn-info" id="turn-info">回合: 1</div>
-      <div class="round-event" id="round-event"></div>
+  <!-- Identity Reveal Overlay -->
+  <div id="identity-overlay" class="overlay hidden">
+    <div class="identity-reveal">
+      <canvas id="identity-canvas" width="300" height="200"></canvas>
+      <h2 id="identity-name"></h2>
+      <p id="identity-desc"></p>
     </div>
-    
-    <!-- Enemy Area -->
-    <div class="enemies-area" id="enemies-area"></div>
-    
-    <!-- Battle Field -->
-    <div class="battle-field" id="battle-field">
-      <div class="effect-layer" id="effect-layer"></div>
-      <div class="card-animation-layer" id="card-animation-layer"></div>
-    </div>
-    
-    <!-- Player Area -->
-    <div class="player-area" id="player-area"></div>
-    
-    <!-- Hand Cards -->
-    <div class="hand-cards-area" id="hand-cards-area"></div>
-    
-    <!-- Action Bar -->
-    <div class="action-bar" id="action-bar">
-      <button id="end-turn-btn" class="action-btn end-turn">结束回合</button>
-      <button id="cancel-btn" class="action-btn cancel hidden">取消</button>
-    </div>
-    
-    <!-- Log Panel -->
-    <div class="log-panel" id="log-panel">
-      <div class="log-header">战斗日志</div>
-      <div class="log-content" id="log-content"></div>
-    </div>
-    
-    <!-- Modal for choices -->
-    <div class="modal-overlay hidden" id="modal-overlay">
-      <div class="modal-content" id="modal-content"></div>
-    </div>
+  </div>
+  
+  <!-- Main Game Canvas -->
+  <canvas id="game-canvas"></canvas>
+  
+  <!-- Modal Overlay -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <div id="modal-content" class="modal-content"></div>
   </div>
   
   <!-- Result Screen -->
-  <div id="result-screen" class="screen">
+  <div id="result-screen" class="overlay hidden">
     <div class="result-container">
-      <h2 id="result-title">游戏结束</h2>
-      <p id="result-message"></p>
-      <div id="result-details"></div>
-      <button id="play-again-btn" class="start-btn">再来一局</button>
+      <h1 id="result-title" class="result-title"></h1>
+      <p id="result-message" class="result-message"></p>
+      <div id="result-details" class="result-details"></div>
+      <button id="play-again-btn" class="neon-button">
+        <span class="btn-text">再来一局</span>
+        <span class="btn-glow"></span>
+      </button>
     </div>
   </div>
   
   <!-- Footer -->
-  <footer class="game-footer">
-    <span>Powered by</span>
-    <a href="https://www.apiyi.com" target="_blank" rel="noopener">APIYI</a>
-    <span class="footer-divider">|</span>
-    <a href="https://www.apiyi.com" target="_blank" rel="noopener">apiyi.com</a>
-  </footer>
-
-  <script src="app.js"></script>
+  <div class="footer">
+    Powered by <a href="https://www.apiyi.com" target="_blank" rel="noopener">APIYI</a>
+  </div>
+  
+  <script src="game.js"></script>
 </body>
 </html>
